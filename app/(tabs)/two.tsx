@@ -1,14 +1,44 @@
-import { StyleSheet } from 'react-native';
-
-import EditScreenInfo from '@/components/EditScreenInfo';
+import { FlatList, StyleSheet } from 'react-native';
 import { Text, View } from '@/components/Themed';
+import { useEffect, useState } from 'react';
+
+import DataCard from "@/components/DataCard"
+import EditScreenInfo from '@/components/EditScreenInfo';
+import { Sensor } from '../interfaces/sensor';
+import { fetchData } from '../API';
+
+const renderItem = ({ item }: { item: Sensor }) => (
+  <DataCard>
+    <Text>Distancia: {item.distancia}</Text>
+    <Text>Nivel de Agua: {item.nivelAgua}</Text>
+    <Text>Gas: {item.gas}</Text>
+  </DataCard>
+);
+
 
 export default function TabTwoScreen() {
+  const [data, setData] = useState<Sensor[]>([]);
+
+  const getData = async () => {
+    try {
+      const res = await fetchData();
+      setData(res);
+    } catch {
+      console.log("Error getting data");
+      
+    }
+  }
+
+  useEffect(() => {
+    getData();
+  }, [])
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Tab Two</Text>
-      <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-      <EditScreenInfo path="app/(tabs)/two.tsx" />
+      <FlatList
+        data={data}
+        renderItem={renderItem}
+        keyExtractor={(item, index) => index.toString()}
+      />
     </View>
   );
 }
